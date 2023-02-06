@@ -3,7 +3,6 @@ package opengl
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/go-gl/gl/v4.6-core/gl"
 )
@@ -78,11 +77,7 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 	var status int32
 	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &status)
 	if status == gl.FALSE {
-		var logLength int32
-		gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &logLength)
-
-		log := strings.Repeat("\x00", int(logLength+1))
-		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(log))
+		log := GetInfoLog(shader, gl.GetShaderiv, gl.GetShaderInfoLog)
 
 		return 0, fmt.Errorf("failed to compile %v: %v", source, log)
 	}
@@ -91,7 +86,7 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 }
 
 // initOpenGL initializes OpenGL and returns an intiialized program.
-func InitOpenGL() uint32 {
+func InitOpenGL() Program {
 	if err := gl.Init(); err != nil {
 		panic(err)
 	}
@@ -111,9 +106,13 @@ func InitOpenGL() uint32 {
 		panic(err)
 	}
 
-	prog := gl.CreateProgram()
-	gl.AttachShader(prog, vertexShader)
-	gl.AttachShader(prog, fragmentShader)
-	gl.LinkProgram(prog)
+	progId := gl.CreateProgram()
+	gl.AttachShader(progId, vertexShader)
+	gl.AttachShader(progId, fragmentShader)
+	gl.LinkProgram(progId)
+
+	prog := Program{
+		Id: progId,
+	}
 	return prog
 }

@@ -20,13 +20,14 @@ const (
 
 func main() {
 	fmt.Println("App Started")
-	report := market.LoadReport("/data/ws/data/candlesgi.xml")
+	report := market.LoadReport("/data/ws/data/candles.xml")
 	runtime.LockOSThread()
 
 	window := initGlfw()
 	defer glfw.Terminate()
 
 	program := opengl.InitOpenGL()
+	program.Validate()
 
 	s := scene.New(report)
 	s.Build(geom.NewRect(-1, -1, 1, 1))
@@ -58,13 +59,14 @@ func initGlfw() *glfw.Window {
 	return window
 }
 
-func draw(s *scene.Scene2D, window *glfw.Window, program uint32) {
+func draw(s *scene.Scene2D, window *glfw.Window, program opengl.Program) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	gl.ClearColor(1, 1, 1, 1)
 
-	gl.UseProgram(program)
+	gl.UseProgram(program.Id)
 
 	s.Draw()
+
 	fpsCalc()
 
 	glfw.PollEvents()
