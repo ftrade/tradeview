@@ -20,7 +20,7 @@ const (
 
 func main() {
 	fmt.Println("App Started")
-	report := market.LoadReport("/data/ws/data/candles_small.xml")
+	report := market.LoadReport("/data/ws/data/candles.xml")
 	runtime.LockOSThread()
 
 	window := gui.InitWindow(width, height, "Tradeview")
