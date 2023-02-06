@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"runtime"
+	"time"
 	"tradeview/geom"
 	"tradeview/market"
 	"tradeview/opengl"
@@ -19,7 +20,7 @@ const (
 
 func main() {
 	fmt.Println("App Started")
-	report := market.LoadReport("/data/ws/data/candles_small.xml")
+	report := market.LoadReport("/data/ws/data/candlesgi.xml")
 	runtime.LockOSThread()
 
 	window := initGlfw()
@@ -64,7 +65,22 @@ func draw(s *scene.Scene2D, window *glfw.Window, program uint32) {
 	gl.UseProgram(program)
 
 	s.Draw()
+	fpsCalc()
 
 	glfw.PollEvents()
 	window.SwapBuffers()
+}
+
+var prevTime time.Time
+var frameCount int
+
+func fpsCalc() {
+	frameCount++
+	elapsed := time.Since(prevTime)
+	if elapsed.Seconds() > 1 {
+		fps := float64(frameCount) / elapsed.Seconds()
+		fmt.Printf("FPS: %f\n", fps)
+		prevTime = time.Now()
+		frameCount = 0
+	}
 }
