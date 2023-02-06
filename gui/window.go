@@ -11,33 +11,59 @@ import (
 
 type Window struct {
 	Title       string
-	View        mgl.Mat3
+	View        mgl.Mat4
 	window      *glfw.Window
 	draw        func()
-	viewChanged func(mgl.Mat3)
+	viewChanged func(mgl.Mat4)
+	projection  mgl.Mat4
 }
 
 func InitWindow(width, height int, title string) *Window {
 	w := initGlfw(width, height, title)
-	glfw.GetCurrentContext().SetSizeCallback(resizeCb)
-	glfw.GetCurrentContext().SetScrollCallback(scrollCb)
-	return &Window{
-		Title:  title,
-		View:   mgl.Ident3(),
-		window: w,
+
+	window := &Window{
+		Title:      title,
+		View:       mgl.Ident4(),
+		window:     w,
+		projection: mgl.Ortho2D(-1, 1, -1, 1),
 	}
+	w.SetSizeCallback(func(w *glfw.Window, width, height int) {
+		gl.Viewport(0, 0, int32(width), int32(height))
+	})
+
+	var pressedX, pressedY float64
+	w.SetMouseButtonCallback(func(w *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
+		if button == glfw.MouseButtonLeft && action == glfw.Press {
+			fmt.Println("Left button pressed")
+			pressedX, pressedY = w.GetCursorPos()
+		}
+	})
+	w.SetCursorPosCallback(func(w *glfw.Window, xpos, ypos float64) {
+		if w.GetMouseButton(glfw.MouseButtonLeft) == glfw.Press {
+			dX := pressedX - xpos
+			dY := pressedY - ypos
+			dMat := mgl.Translate3D(float32(dX), float32(dY), 0)
+			// p := window.projection.Mul4()
+			fmt.Println(dMat)
+			fmt.Println("xpos:", xpos, ". ypos:", ypos)
+		}
+
+	})
+
+	w.SetScrollCallback(func(w *glfw.Window, xoff, yoff float64) {
+		var scaleFactor float32 = 0.5
+		if yoff > 0 {
+			scaleFactor = 2
+		}
+		scale := mgl.Scale3D(scaleFactor, scaleFactor, 1)
+		window.View = window.View.Mul4(scale)
+		window.viewChanged(window.View)
+	})
+
+	return window
 }
 
-func resizeCb(w *glfw.Window, width int, height int) {
-	gl.Viewport(0, 0, int32(width), int32(height))
-}
-
-func scrollCb(w *glfw.Window, xoff float64, yoff float64) {
-	fmt.Printf("Scroll calb. xoff: %v, yoff: %v\n", xoff, yoff)
-	// view = mgl.Scale2D(float32(yoff), float32(yoff))
-}
-
-func (w *Window) OnViewChange(cb func(mgl.Mat3)) {
+func (w *Window) OnViewChange(cb func(mgl.Mat4)) {
 	w.viewChanged = cb
 }
 
@@ -53,7 +79,7 @@ func fpsCalc() {
 	elapsed := time.Since(prevTime)
 	if elapsed.Seconds() > 1 {
 		fps := float64(frameCount) / elapsed.Seconds()
-		glfw.GetCurrentContext().SetTitle(fmt.Sprintf("Tradeview. FPS: %f", fps))
+		glfw.GetCurrentContext().SetTitle(fmt.Sprintf("Tradeview. FPS: %0.2f", fps))
 		prevTime = time.Now()
 		frameCount = 0
 	}

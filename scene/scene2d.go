@@ -41,13 +41,13 @@ func (s *Scene2D) Build(viewport geom.Rect) {
 	}
 
 	barCellWidth := float32(stats.MinTimeStep)
-	modelX1 := timeToX(stats.MinTime) - barCellWidth
-	modelX2 := timeToX(stats.MaxTime) + barCellWidth
+	modelLeft := timeToX(stats.MinTime) - barCellWidth
+	modelRight := timeToX(stats.MaxTime) + barCellWidth
 
 	volumeViewport, barViewport := viewport.HSplitPer(0.2)
 
-	bm := geom.NewMapper(geom.NewRect(modelX1, stats.MinPrice, modelX2, stats.MaxPrice), barViewport)
-	vm := geom.NewMapper(geom.NewRect(modelX1, 0, modelX2, float32(stats.MaxVolume)), volumeViewport)
+	bm := geom.NewMapper(geom.NewRect(modelLeft, stats.MinPrice, modelRight, stats.MaxPrice), barViewport)
+	vm := geom.NewMapper(geom.NewRect(modelLeft, 0, modelRight, float32(stats.MaxVolume)), volumeViewport)
 
 	vBarWidth := bm.ViewportWithd(barCellWidth) / 2
 	vBarHalfWidth := vBarWidth / 2

@@ -24,13 +24,13 @@ func (p *Program) Validate() {
 	}
 }
 
-func (p *Program) InitMatrix(m mgl.Mat3) {
+func (p *Program) InitMatrix(m mgl.Mat4) {
 	matrixName := gl.Str("matrix\x00")
 	p.matrixId = gl.GetUniformLocation(p.Id, matrixName)
 	p.UpdateMatrix(m)
 }
 
-func (p *Program) UpdateMatrix(m mgl.Mat3) {
+func (p *Program) UpdateMatrix(m mgl.Mat4) {
 	gl.UseProgram(p.Id)
-	gl.UniformMatrix3fv(p.matrixId, 1, false, &m[0])
+	gl.UniformMatrix4fv(p.matrixId, 1, false, &m[0])
 }
