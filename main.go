@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"runtime"
-	"time"
 	"tradeview/geom"
+	"tradeview/gui"
 	"tradeview/market"
 	"tradeview/opengl"
 	"tradeview/scene"
@@ -20,10 +20,10 @@ const (
 
 func main() {
 	fmt.Println("App Started")
-	report := market.LoadReport("/data/ws/data/candles.xml")
+	report := market.LoadReport("/data/ws/data/candles_small.xml")
 	runtime.LockOSThread()
 
-	window := initGlfw()
+	window := gui.InitWindow(width, height, "Tradeview")
 	defer glfw.Terminate()
 
 	program := opengl.InitOpenGL()
@@ -32,57 +32,15 @@ func main() {
 	s := scene.New(report)
 	s.Build(geom.NewRect(-1, -1, 1, 1))
 
-	for !window.ShouldClose() {
+	program.InitMatrix(window.View)
+	window.OnViewChange(program.UpdateMatrix)
 
-		draw(s, window, program)
-	}
-}
+	window.OnDraw(func() {
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		gl.ClearColor(1, 1, 1, 1)
 
-// initGlfw initializes glfw and returns a Window to use.
-func initGlfw() *glfw.Window {
-	if err := glfw.Init(); err != nil {
-		panic(err)
-	}
-
-	glfw.WindowHint(glfw.Resizable, glfw.True)
-	glfw.WindowHint(glfw.ContextVersionMajor, 4) // OR 2
-	glfw.WindowHint(glfw.ContextVersionMinor, 6)
-	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
-	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
-
-	window, err := glfw.CreateWindow(width, height, "Tradeview", nil, nil)
-	if err != nil {
-		panic(err)
-	}
-	window.MakeContextCurrent()
-
-	return window
-}
-
-func draw(s *scene.Scene2D, window *glfw.Window, program opengl.Program) {
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-	gl.ClearColor(1, 1, 1, 1)
-
-	gl.UseProgram(program.Id)
-
-	s.Draw()
-
-	fpsCalc()
-
-	glfw.PollEvents()
-	window.SwapBuffers()
-}
-
-var prevTime time.Time
-var frameCount int
-
-func fpsCalc() {
-	frameCount++
-	elapsed := time.Since(prevTime)
-	if elapsed.Seconds() > 1 {
-		fps := float64(frameCount) / elapsed.Seconds()
-		fmt.Printf("FPS: %f\n", fps)
-		prevTime = time.Now()
-		frameCount = 0
-	}
+		gl.UseProgram(program.Id)
+		s.Draw()
+	})
+	window.RunRendering()
 }

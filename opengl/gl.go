@@ -7,35 +7,6 @@ import (
 	"github.com/go-gl/gl/v4.6-core/gl"
 )
 
-const (
-	vertexShaderSource = `
-		#version 460
-		layout(location = 0) in vec2 position;
-		layout(location = 1) in uint vertex_colour;
-		out vec3 colour;
-		void main() {
-			if (vertex_colour == 1) {
-				colour = vec3(0.898, 0.274, 0.282);
-			} else if (vertex_colour == 2) {
-				colour = vec3(0.258, 0.650, 0.513);
-			} else {
-				colour = vec3(0.5, 0.5, 0.5);
-			}
-			gl_Position = vec4(position, 0.0, 1.0);
-		}
-	` + "\x00"
-
-	fragmentShaderSource = `
-		#version 460
-		out vec4 frag_colour;
-		in vec3 colour;
-		void main() {
-			frag_colour = vec4(colour, 1.0);
-			// frag_colour = vec4(0.5, 0.5, 0.5, 1.0);
-		}
-	` + "\x00"
-)
-
 // makeVao initializes and returns a vertex array from the points provided.
 func MakeVao(points []float32, colors []uint32) uint32 {
 	var pointsVbo uint32
@@ -95,6 +66,10 @@ func InitOpenGL() Program {
 
 	// gl.Enable(gl.DEPTH_TEST)
 	// gl.DepthFunc(gl.LESS)
+
+	// gl.Enable(gl.CULL_FACE)
+	// gl.CullFace(gl.BACK)
+	// gl.FrontFace(gl.CW)
 
 	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
 	if err != nil {
