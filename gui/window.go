@@ -11,24 +11,22 @@ import (
 
 type Window struct {
 	Title         string
-	View          mgl.Mat4
+	BarMatrix     mgl.Mat4
+	VolumeMatrix  mgl.Mat4
 	window        *glfw.Window
 	draw          func()
-	viewChanged   func(mgl.Mat4)
-	projection    mgl.Mat4
 	width, height int
+	viewport      *Viewport
 }
 
 func InitWindow(width, height int, title string) *Window {
 	w := initGlfw(width, height, title)
 
 	window := &Window{
-		Title:      title,
-		View:       mgl.Ident4(),
-		window:     w,
-		projection: mgl.Ortho2D(-1, 1, -1, 1),
-		width:      width,
-		height:     height,
+		Title:  title,
+		window: w,
+		width:  width,
+		height: height,
 	}
 	w.SetSizeCallback(func(w *glfw.Window, width, height int) {
 		gl.Viewport(0, 0, int32(width), int32(height))
@@ -36,66 +34,46 @@ func InitWindow(width, height int, title string) *Window {
 		window.height = height
 	})
 
-	var pressedX, pressedY float64
-	wasPressed := false
-	var movedView mgl.Mat4
+	var prevX float64
 	w.SetMouseButtonCallback(func(w *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
 		if button == glfw.MouseButtonLeft && action == glfw.Press {
-			pressedX, pressedY = w.GetCursorPos()
-			wasPressed = true
-		} else if button == glfw.MouseButtonLeft && action == glfw.Release && wasPressed {
-			wasPressed = false
-			window.View = movedView
+			prevX, _ = w.GetCursorPos()
 		}
 	})
-	windowToView := func(wx, wy float64) (float32, float32) {
-		wp := mgl.Vec3{float32(wx), float32(window.height) - float32(wy), 0}
-		vp, _ := mgl.UnProject(wp, window.View, window.projection, 0, 0, window.width, window.height)
-		return vp[0], vp[1]
-	}
+
 	w.SetCursorPosCallback(func(w *glfw.Window, xpos, ypos float64) {
 		if w.GetMouseButton(glfw.MouseButtonLeft) == glfw.Press {
-			pressedVX, pressedVY := windowToView(pressedX, pressedY)
-			vx, vy := windowToView(xpos, ypos)
-			move := mgl.Translate3D(vx-pressedVX, vy-pressedVY, 0)
-			movedView = window.View.Mul4(move)
-			window.viewChanged(movedView)
+			dx := (prevX - xpos) / float64(window.width)
+			window.viewport.Move(float32(dx))
+			window.BarMatrix, window.VolumeMatrix = window.viewport.Matrices()
+			prevX = xpos
 		}
 	})
 
 	w.SetScrollCallback(func(w *glfw.Window, xoff, yoff float64) {
-		var scaleFactor float32 = 0.8
+		var scaleFactor float32 = 1.2
 		if yoff > 0 {
-			scaleFactor = 1.2
+			scaleFactor = 0.8
 		}
-		wx, wy := w.GetCursorPos()
-		vx, vy := windowToView(wx, wy)
-
-		moveToMouse := mgl.Translate3D(vx, vy, 0)
-		moveBack := mgl.Translate3D(-vx, -vy, 0)
-		scale := mgl.Scale3D(scaleFactor, scaleFactor, 1)
-		window.View = window.View.Mul4(moveToMouse).Mul4(scale).Mul4(moveBack)
-		window.viewChanged(window.View)
-	})
-	w.SetKeyCallback(func(w *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
-		if mods&glfw.ModControl != 0 {
-			if key == glfw.KeyUp || key == glfw.KeyDown {
-				scale := mgl.Scale3D(1, 1.2, 1)
-				if key == glfw.KeyDown {
-					scale = mgl.Scale3D(1, 0.8, 1)
-				}
-				window.View = window.View.Mul4(scale)
-				window.viewChanged(window.View)
-			}
-		}
-
+		window.scale(scaleFactor)
 	})
 
 	return window
 }
 
-func (w *Window) OnViewChange(cb func(mgl.Mat4)) {
-	w.viewChanged = cb
+func (w *Window) scale(factor float32) {
+	if factor < 0 {
+		return
+	}
+	x, _ := w.window.GetCursorPos()
+	whereScale := x / float64(w.width)
+	w.viewport.Scale(factor, float32(whereScale))
+	w.BarMatrix, w.VolumeMatrix = w.viewport.Matrices()
+}
+
+func (w *Window) SetViewport(viewport *Viewport) {
+	w.viewport = viewport
+	w.BarMatrix, w.VolumeMatrix = viewport.Matrices()
 }
 
 func (w *Window) OnDraw(draw func()) {

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"runtime"
-	"tradeview/geom"
 	"tradeview/gui"
 	"tradeview/market"
 	"tradeview/opengl"
@@ -25,22 +24,25 @@ func main() {
 
 	window := gui.InitWindow(width, height, "Tradeview")
 	defer glfw.Terminate()
+	viewport := gui.NewViewport(report)
+	window.SetViewport(viewport)
 
 	program := opengl.InitOpenGL()
+	program.InitUniformMatrix()
 	program.Validate()
 
 	s := scene.New(report)
-	s.Build(geom.NewRect(-1, -1, 1, 1))
-
-	program.InitMatrix(window.View)
-	window.OnViewChange(program.UpdateMatrix)
+	s.Build()
 
 	window.OnDraw(func() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		gl.ClearColor(1, 1, 1, 1)
 
 		gl.UseProgram(program.Id)
-		s.Draw()
+		program.UpdateMatrix(window.BarMatrix)
+		s.DrawBars()
+		program.UpdateMatrix(window.VolumeMatrix)
+		s.DrawVolumes()
 	})
 	window.RunRendering()
 }

@@ -24,10 +24,9 @@ func (p *Program) Validate() {
 	}
 }
 
-func (p *Program) InitMatrix(m mgl.Mat4) {
+func (p *Program) InitUniformMatrix() {
 	matrixName := gl.Str("matrix\x00")
 	p.matrixId = gl.GetUniformLocation(p.Id, matrixName)
-	p.UpdateMatrix(m)
 }
 
 func (p *Program) UpdateMatrix(m mgl.Mat4) {
