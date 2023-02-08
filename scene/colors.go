@@ -3,6 +3,8 @@ package scene
 type Color = uint32
 
 const (
-	Red   Color = 1
-	Grean Color = 2
+	Grey     Color = 0 // default is not setted
+	Red      Color = 1
+	Grean    Color = 2
+	DarkGrey Color = 3
 )

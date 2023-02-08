@@ -59,3 +59,7 @@ func (v *Viewport) CalcView() ViewInfo {
 		MaxVolume:  maxVol,
 	}
 }
+
+// func (v *Viewport) WindowPointToBar(x, y float32, width, height int) (bar market.Candle, price float32, ok bool) {
+
+// }

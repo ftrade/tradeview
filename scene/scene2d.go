@@ -33,7 +33,6 @@ func (s *Scene2D) Build() {
 	barLinesColors := make([]uint32, 2*candleN)
 
 	volumeRectsVerteces := make([]float32, 12*2*candleN)
-	volumeRectsColors := make([]uint32, 12*candleN)
 
 	barHalfWidth := float32(0.25)
 	for i, bar := range bars {
@@ -114,13 +113,6 @@ func (s *Scene2D) Build() {
 
 		volumeRectsVerteces[rectPos+10] = barRight
 		volumeRectsVerteces[rectPos+11] = vy2
-
-		volumeRectsColors[i*6] = color
-		volumeRectsColors[i*6+1] = color
-		volumeRectsColors[i*6+2] = color
-		volumeRectsColors[i*6+3] = color
-		volumeRectsColors[i*6+4] = color
-		volumeRectsColors[i*6+5] = color
 	}
 
 	s.barLinesVerteces = barLinesVerteces

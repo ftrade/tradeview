@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-gl/gl/all-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/go-gl/mathgl/mgl32"
 )
 
 const (
@@ -44,7 +45,8 @@ func main() {
 		s.DrawBars()
 		program.UpdateMatrix(window.ViewInfo.VolumesMat)
 		s.DrawVolumes()
-
+		// matrix for crosslines
+		program.UpdateMatrix(mgl32.Ortho2D(0, float32(window.Width), float32(window.Height), 0))
 	})
 	window.RunRendering()
 }

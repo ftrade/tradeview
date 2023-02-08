@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 	"tradeview/config"
+	"tradeview/scene"
 
 	"github.com/go-gl/gl/all-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -13,9 +14,10 @@ import (
 type Window struct {
 	Title         string
 	ViewInfo      ViewInfo
+	Width, Height int
+	crosslines    *scene.CrossLines
 	window        *glfw.Window
 	drawScene     func()
-	width, height int
 	viewport      *Viewport
 	font          *glfont.Font
 }
@@ -29,19 +31,20 @@ func InitWindow(width, height int, title string, viewport *Viewport) *Window {
 	}
 
 	window := &Window{
-		Title:    title,
-		window:   w,
-		width:    width,
-		height:   height,
-		font:     font,
-		viewport: viewport,
+		Title:      title,
+		Width:      width,
+		Height:     height,
+		window:     w,
+		crosslines: scene.NewCrossLines(),
+		font:       font,
+		viewport:   viewport,
 	}
 	window.ViewInfo = viewport.CalcView()
 
 	w.SetSizeCallback(func(w *glfw.Window, width, height int) {
 		gl.Viewport(0, 0, int32(width), int32(height))
-		window.width = width
-		window.height = height
+		window.Width = width
+		window.Height = height
 		font.UpdateResolution(width, height)
 	})
 
@@ -54,7 +57,7 @@ func InitWindow(width, height int, title string, viewport *Viewport) *Window {
 
 	w.SetCursorPosCallback(func(w *glfw.Window, xpos, ypos float64) {
 		if w.GetMouseButton(glfw.MouseButtonLeft) == glfw.Press {
-			dx := (prevX - xpos) / float64(window.width)
+			dx := (prevX - xpos) / float64(window.Width)
 			window.viewport.Move(float32(dx))
 			window.ViewInfo = window.viewport.CalcView()
 			prevX = xpos
@@ -77,7 +80,7 @@ func (w *Window) scale(factor float32) {
 		return
 	}
 	x, _ := w.window.GetCursorPos()
-	whereScale := x / float64(w.width)
+	whereScale := x / float64(w.Width)
 	w.viewport.Scale(factor, float32(whereScale))
 	w.ViewInfo = w.viewport.CalcView()
 }
@@ -112,11 +115,23 @@ func (w *Window) RunRendering() {
 }
 
 func (w *Window) drawLabels() {
-	bottomY := int(float32(w.height) * config.BarsComponentHeight)
+	// warning. Code is fragile, don't draw text before crosslines drawing because it change program
+	yBottom := int(float32(w.Height) * config.BarsComponentHeight)
+	x, y := w.window.GetCursorPos()
+	barsHeight := float32(w.Height) * config.BarsComponentHeight
+	if float32(y) <= barsHeight && y >= 0 && x >= 0 && x <= float64(w.Width) {
+		dPrice := w.ViewInfo.MaxPrice - w.ViewInfo.MinPrice
+		price := w.ViewInfo.MaxPrice - (float32(y)/barsHeight)*dPrice
+		w.crosslines.Update(float32(x), float32(y), float32(w.Width), float32(yBottom))
+		w.crosslines.Draw()
+		w.font.SetColor(0.3, 0.3, 0.3, 1)
+		w.font.Printf(0, float32(y), 1, fmt.Sprintf("%0.2f", price))
+	}
 
-	w.font.SetColor(0.5, 0.5, 0.5, 1)
-	w.font.Printf(0, float32(bottomY), 1, fmt.Sprintf("%0.2f", w.ViewInfo.MinPrice))
+	w.font.SetColor(0.3, 0.3, 0.3, 1)
+	w.font.Printf(0, float32(yBottom), 1, fmt.Sprintf("%0.2f", w.ViewInfo.MinPrice))
 	w.font.Printf(0, config.FontSize, 1, fmt.Sprintf("%0.2f", w.ViewInfo.MaxPrice))
+
 }
 
 // initGlfw initializes glfw and returns a Window to use.
