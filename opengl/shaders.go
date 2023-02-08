@@ -14,6 +14,8 @@ const (
 				colour = vec3(0.258, 0.650, 0.513);
 			} else if (vertex_colour == 3) {
 				colour = vec3(0.3, 0.3, 0.3);
+			} else if (vertex_colour == 4) {
+				colour = vec3(0.298, 0.368, 0.956);
 			} else {
 				colour = vec3(0.5, 0.5, 0.5);
 			}

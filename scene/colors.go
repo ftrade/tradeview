@@ -7,4 +7,5 @@ const (
 	Red      Color = 1
 	Grean    Color = 2
 	DarkGrey Color = 3
+	Blue     Color = 4
 )

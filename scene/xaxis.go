@@ -1,4 +1,4 @@
-package gui
+package scene
 
 import (
 	"math"
@@ -19,9 +19,9 @@ type segment struct {
 
 // XAxis represents x axis that can map bar timestamp to index and vice versa.
 type XAxis struct {
+	Bars      []market.Candle
 	segments  []segment
 	stepWidth int
-	bars      []market.Candle
 }
 
 func NewXAxis(bars []market.Candle) XAxis {
@@ -68,20 +68,26 @@ func NewXAxis(bars []market.Candle) XAxis {
 	return XAxis{
 		segments:  segments,
 		stepWidth: int(stepWidth),
-		bars:      bars,
+		Bars:      bars,
 	}
 }
 
-func (xa *XAxis) XWidth() int {
-	return len(xa.bars) - 1
+func (xa *XAxis) WidthX() int {
+	return len(xa.Bars) - 1
+}
+
+func (xa *XAxis) WidthTime() int64 {
+	leftMilli := xa.Bars[0].Timestampt
+	rightMilli := xa.Bars[len(xa.Bars)-1].Timestampt
+	return rightMilli - leftMilli
 }
 
 func (xa *XAxis) MinMaxPriceAndMaxVolume(from int, upTo int) (float32, float32, int32) {
 	if from < 0 {
 		from = 0
 	}
-	if upTo >= len(xa.bars) {
-		upTo = len(xa.bars) - 1
+	if upTo >= len(xa.Bars) {
+		upTo = len(xa.Bars) - 1
 	}
 
 	fromSegIndex := xa.searchSegment(from)
@@ -103,7 +109,7 @@ func (xa *XAxis) MinMaxPriceAndMaxVolume(from int, upTo int) (float32, float32, 
 			i = curSeg.rightIndex + 1
 		} else {
 			for ; i <= curSeg.rightIndex && i <= upTo; i++ {
-				b := xa.bars[i]
+				b := xa.Bars[i]
 				if b.High > maxPrice {
 					maxPrice = b.High
 				}
@@ -120,7 +126,7 @@ func (xa *XAxis) MinMaxPriceAndMaxVolume(from int, upTo int) (float32, float32, 
 }
 
 func (xa *XAxis) searchSegment(index int) (segIndex int) {
-	avgSegmentSize := len(xa.bars) / len(xa.segments)
+	avgSegmentSize := len(xa.Bars) / len(xa.segments)
 	si := index / avgSegmentSize
 	if si >= len(xa.segments) {
 		si = len(xa.segments) - 1
@@ -138,8 +144,52 @@ func (xa *XAxis) searchSegment(index int) (segIndex int) {
 	}
 }
 
-func (xa *XAxis) TimeToX(millis int64) uint32 {
-	return 0
+func (xa *XAxis) TimeToX(millis int64) float32 {
+	timeCoeff := float32(millis-xa.Bars[0].Timestampt) / float32(xa.WidthTime())
+	indexGuess := timeCoeff * float32(len(xa.Bars))
+	i := int(indexGuess)
+	isFirst, searchLeft := true, false
+	leftIndex, rightIndex := -1, -1
+	for i >= 0 && i < len(xa.Bars) {
+		bar := xa.Bars[i]
+		if bar.Timestampt == millis {
+			return float32(i)
+		}
+		if isFirst {
+			isFirst = false
+			if bar.Timestampt > millis {
+				searchLeft = true
+			}
+		} else {
+			if searchLeft {
+				if bar.Timestampt < millis {
+					leftIndex = i
+					rightIndex = i + 1
+					break
+				}
+			} else {
+				if bar.Timestampt < millis {
+					leftIndex = i
+					rightIndex = i + 1
+					break
+				}
+			}
+		}
+		if searchLeft {
+			i--
+		} else {
+			i++
+		}
+	}
+	if leftIndex < 0 {
+		if searchLeft {
+			return 0
+		} else {
+			return float32(xa.WidthX())
+		}
+	}
+	widthBetweenBars := float32(xa.Bars[rightIndex].Timestampt - xa.Bars[leftIndex].Timestampt)
+	return float32(leftIndex) + float32(millis-xa.Bars[leftIndex].Timestampt)/widthBetweenBars
 }
 
 func (xa *XAxis) XToTime(x float32) int64 {

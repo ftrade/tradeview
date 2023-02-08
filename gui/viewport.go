@@ -3,23 +3,21 @@ package gui
 import (
 	"tradeview/config"
 	"tradeview/market"
+	"tradeview/scene"
 
 	mgl "github.com/go-gl/mathgl/mgl32"
 )
 
 type Viewport struct {
-	XAxis               XAxis
+	XAxis               scene.XAxis
 	viewRight, viewLeft float32
-	report              market.Report
 }
 
-func NewViewport(report market.Report) *Viewport {
-	xAxis := NewXAxis(report.Candles.Items)
+func NewViewport(xAxis scene.XAxis) *Viewport {
 	v := &Viewport{
-		report:    report,
 		XAxis:     xAxis,
 		viewLeft:  -0.5,
-		viewRight: float32(xAxis.XWidth()) + 0.5,
+		viewRight: float32(xAxis.WidthX()) + 0.5,
 	}
 	return v
 }
@@ -62,8 +60,8 @@ func (v *Viewport) CalcView() ViewInfo {
 
 func (v *Viewport) WindowXToBar(x, width float32) (bar market.Candle, ok bool) {
 	index := int(v.viewLeft + v.ViewWidth()*(x/width) + 0.5)
-	if index >= 0 && index < len(v.XAxis.bars) {
-		return v.XAxis.bars[index], true
+	if index >= 0 && index < len(v.XAxis.Bars) {
+		return v.XAxis.Bars[index], true
 	}
 	return bar, false
 }

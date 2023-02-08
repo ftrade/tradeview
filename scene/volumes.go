@@ -59,7 +59,7 @@ func BuildVolumes(candles []market.Candle) *Volumes {
 	}
 }
 
-func (cs *Volumes) Draw() {
-	gl.BindVertexArray(cs.rectsVao)
-	gl.DrawArrays(gl.TRIANGLES, 0, int32(len(cs.rectsVerteces)/2))
+func (v *Volumes) Draw() {
+	gl.BindVertexArray(v.rectsVao)
+	gl.DrawArrays(gl.TRIANGLES, 0, int32(len(v.rectsVerteces)/2))
 }

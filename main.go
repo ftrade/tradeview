@@ -25,7 +25,8 @@ func main() {
 	runtime.LockOSThread()
 	opengl.InitOpenGL()
 
-	viewport := gui.NewViewport(report)
+	xAxis := scene.NewXAxis(report.Candles.Items)
+	viewport := gui.NewViewport(xAxis)
 	window := gui.InitWindow(width, height, "Tradeview", viewport)
 	defer glfw.Terminate()
 
@@ -35,6 +36,7 @@ func main() {
 
 	candles := scene.BuildCandles(report.Candles.Items)
 	volumes := scene.BuildVolumes(report.Candles.Items)
+	trades := scene.BuildTrades(report.Trades.Items, xAxis)
 
 	window.OnDraw(func() {
 		gl.Clear(gl.COLOR_BUFFER_BIT)
@@ -43,6 +45,7 @@ func main() {
 		gl.UseProgram(program.Id)
 		program.UpdateMatrix(window.ViewInfo.BarsMat)
 		candles.Draw()
+		trades.Draw()
 		program.UpdateMatrix(window.ViewInfo.VolumesMat)
 		volumes.Draw()
 		// matrix for crosslines
