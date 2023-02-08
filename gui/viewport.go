@@ -44,12 +44,18 @@ func (v *Viewport) Move(dxFactor float32) {
 	v.viewRight = newRight
 }
 
-func (v *Viewport) Matrices() (mgl.Mat4, mgl.Mat4) {
+func (v *Viewport) CalcView() ViewInfo {
 	minPrice, maxPrice, maxVol := v.XAxis.MinMaxPriceAndMaxVolume(int(v.viewLeft), int(v.viewRight))
 	priceHeight := (maxPrice - minPrice) / config.BarsComponentHeight
 	yWindowBottom := maxPrice - priceHeight
 	barsMat := mgl.Ortho2D(v.viewLeft, v.viewRight, yWindowBottom, maxPrice)
 	volHeigh := float32(maxVol) / (1 - config.BarsComponentHeight)
 	volumeMat := mgl.Ortho2D(v.viewLeft, v.viewRight, 0, volHeigh)
-	return barsMat, volumeMat
+	return ViewInfo{
+		BarsMat:    barsMat,
+		VolumesMat: volumeMat,
+		MinPrice:   minPrice,
+		MaxPrice:   maxPrice,
+		MaxVolume:  maxVol,
+	}
 }

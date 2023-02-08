@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/go-gl/gl/v4.6-core/gl"
+	"github.com/go-gl/gl/all-core/gl"
 )
 
 // makeVao initializes and returns a vertex array from the points provided.
@@ -57,20 +57,16 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 }
 
 // initOpenGL initializes OpenGL and returns an intiialized program.
-func InitOpenGL() Program {
+func InitOpenGL() {
 	if err := gl.Init(); err != nil {
 		panic(err)
 	}
 	version := gl.GoStr(gl.GetString(gl.VERSION))
 	log.Println("OpenGL version", version)
 
-	// gl.Enable(gl.DEPTH_TEST)
-	// gl.DepthFunc(gl.LESS)
+}
 
-	// gl.Enable(gl.CULL_FACE)
-	// gl.CullFace(gl.BACK)
-	// gl.FrontFace(gl.CW)
-
+func MakeProgram() Program {
 	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
 	if err != nil {
 		panic(err)

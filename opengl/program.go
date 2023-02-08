@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/go-gl/gl/v4.6-core/gl"
+	"github.com/go-gl/gl/all-core/gl"
 	mgl "github.com/go-gl/mathgl/mgl32"
 )
 

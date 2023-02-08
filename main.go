@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 	"runtime"
+	"tradeview/config"
 	"tradeview/gui"
 	"tradeview/market"
 	"tradeview/opengl"
 	"tradeview/scene"
 
-	"github.com/go-gl/gl/v4.6-core/gl"
+	"github.com/go-gl/gl/all-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
@@ -19,15 +20,15 @@ const (
 
 func main() {
 	fmt.Println("App Started")
-	report := market.LoadReport("/data/ws/data/candles.xml")
+	report := market.LoadReport(config.ReportPath)
 	runtime.LockOSThread()
+	opengl.InitOpenGL()
 
-	window := gui.InitWindow(width, height, "Tradeview")
-	defer glfw.Terminate()
 	viewport := gui.NewViewport(report)
-	window.SetViewport(viewport)
+	window := gui.InitWindow(width, height, "Tradeview", viewport)
+	defer glfw.Terminate()
 
-	program := opengl.InitOpenGL()
+	program := opengl.MakeProgram()
 	program.InitUniformMatrix()
 	program.Validate()
 
@@ -35,14 +36,15 @@ func main() {
 	s.Build()
 
 	window.OnDraw(func() {
-		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		gl.Clear(gl.COLOR_BUFFER_BIT)
 		gl.ClearColor(1, 1, 1, 1)
 
 		gl.UseProgram(program.Id)
-		program.UpdateMatrix(window.BarMatrix)
+		program.UpdateMatrix(window.ViewInfo.BarsMat)
 		s.DrawBars()
-		program.UpdateMatrix(window.VolumeMatrix)
+		program.UpdateMatrix(window.ViewInfo.VolumesMat)
 		s.DrawVolumes()
+
 	})
 	window.RunRendering()
 }

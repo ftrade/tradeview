@@ -3,35 +3,46 @@ package gui
 import (
 	"fmt"
 	"time"
+	"tradeview/config"
 
-	"github.com/go-gl/gl/v4.6-core/gl"
+	"github.com/go-gl/gl/all-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	mgl "github.com/go-gl/mathgl/mgl32"
+	"github.com/nullboundary/glfont"
 )
 
 type Window struct {
 	Title         string
-	BarMatrix     mgl.Mat4
-	VolumeMatrix  mgl.Mat4
+	ViewInfo      ViewInfo
 	window        *glfw.Window
-	draw          func()
+	drawScene     func()
 	width, height int
 	viewport      *Viewport
+	font          *glfont.Font
 }
 
-func InitWindow(width, height int, title string) *Window {
+func InitWindow(width, height int, title string, viewport *Viewport) *Window {
 	w := initGlfw(width, height, title)
 
-	window := &Window{
-		Title:  title,
-		window: w,
-		width:  width,
-		height: height,
+	font, err := glfont.LoadFont(config.FontPath, config.FontSize, width, height)
+	if err != nil {
+		panic(err)
 	}
+
+	window := &Window{
+		Title:    title,
+		window:   w,
+		width:    width,
+		height:   height,
+		font:     font,
+		viewport: viewport,
+	}
+	window.ViewInfo = viewport.CalcView()
+
 	w.SetSizeCallback(func(w *glfw.Window, width, height int) {
 		gl.Viewport(0, 0, int32(width), int32(height))
 		window.width = width
 		window.height = height
+		font.UpdateResolution(width, height)
 	})
 
 	var prevX float64
@@ -45,7 +56,7 @@ func InitWindow(width, height int, title string) *Window {
 		if w.GetMouseButton(glfw.MouseButtonLeft) == glfw.Press {
 			dx := (prevX - xpos) / float64(window.width)
 			window.viewport.Move(float32(dx))
-			window.BarMatrix, window.VolumeMatrix = window.viewport.Matrices()
+			window.ViewInfo = window.viewport.CalcView()
 			prevX = xpos
 		}
 	})
@@ -68,16 +79,7 @@ func (w *Window) scale(factor float32) {
 	x, _ := w.window.GetCursorPos()
 	whereScale := x / float64(w.width)
 	w.viewport.Scale(factor, float32(whereScale))
-	w.BarMatrix, w.VolumeMatrix = w.viewport.Matrices()
-}
-
-func (w *Window) SetViewport(viewport *Viewport) {
-	w.viewport = viewport
-	w.BarMatrix, w.VolumeMatrix = viewport.Matrices()
-}
-
-func (w *Window) OnDraw(draw func()) {
-	w.draw = draw
+	w.ViewInfo = w.viewport.CalcView()
 }
 
 var prevTime time.Time
@@ -94,14 +96,27 @@ func fpsCalc() {
 	}
 }
 
+func (w *Window) OnDraw(draw func()) {
+	w.drawScene = draw
+}
+
 func (w *Window) RunRendering() {
 	for !w.window.ShouldClose() {
-		w.draw()
+		w.drawScene()
+		w.drawLabels()
 
 		fpsCalc()
 		glfw.PollEvents()
 		w.window.SwapBuffers()
 	}
+}
+
+func (w *Window) drawLabels() {
+	bottomY := int(float32(w.height) * config.BarsComponentHeight)
+
+	w.font.SetColor(0.5, 0.5, 0.5, 1)
+	w.font.Printf(0, float32(bottomY), 1, fmt.Sprintf("%0.2f", w.ViewInfo.MinPrice))
+	w.font.Printf(0, config.FontSize, 1, fmt.Sprintf("%0.2f", w.ViewInfo.MaxPrice))
 }
 
 // initGlfw initializes glfw and returns a Window to use.

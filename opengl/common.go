@@ -3,7 +3,7 @@ package opengl
 import (
 	"strings"
 
-	"github.com/go-gl/gl/v4.6-core/gl"
+	"github.com/go-gl/gl/all-core/gl"
 )
 
 func GetInfoLog(id uint32, getIVFn func(uint32, uint32, *int32), getInfoLogFn func(uint32, int32, *int32, *uint8)) string {
