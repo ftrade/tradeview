@@ -33,8 +33,8 @@ func main() {
 	program.InitUniformMatrix()
 	program.Validate()
 
-	s := scene.New(report)
-	s.Build()
+	candles := scene.BuildCandles(report.Candles.Items)
+	volumes := scene.BuildVolumes(report.Candles.Items)
 
 	window.OnDraw(func() {
 		gl.Clear(gl.COLOR_BUFFER_BIT)
@@ -42,9 +42,9 @@ func main() {
 
 		gl.UseProgram(program.Id)
 		program.UpdateMatrix(window.ViewInfo.BarsMat)
-		s.DrawBars()
+		candles.Draw()
 		program.UpdateMatrix(window.ViewInfo.VolumesMat)
-		s.DrawVolumes()
+		volumes.Draw()
 		// matrix for crosslines
 		program.UpdateMatrix(mgl32.Ortho2D(0, float32(window.Width), float32(window.Height), 0))
 	})
