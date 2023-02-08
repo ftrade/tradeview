@@ -94,6 +94,7 @@ func (s *Scene2D) Build() {
 		barRectsColors[i*6+4] = color
 		barRectsColors[i*6+5] = color
 
+		//same order as bar's one
 		vy1, vy2 = 0, float32(bar.Volume)
 
 		volumeRectsVerteces[rectPos] = barLeft
