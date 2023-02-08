@@ -122,6 +122,9 @@ func (xa *XAxis) MinMaxPriceAndMaxVolume(from int, upTo int) (float32, float32, 
 func (xa *XAxis) searchSegment(index int) (segIndex int) {
 	avgSegmentSize := len(xa.bars) / len(xa.segments)
 	si := index / avgSegmentSize
+	if si >= len(xa.segments) {
+		si = len(xa.segments) - 1
+	}
 	for {
 		curSeg := xa.segments[si]
 		if curSeg.leftIndex <= index && index <= curSeg.rightIndex {

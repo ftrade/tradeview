@@ -42,12 +42,12 @@ func NewCrossLines() *CrossLines {
 	return cl
 }
 
-func (cl *CrossLines) Update(x, y, width, yBottom float32) {
+func (cl *CrossLines) Update(x, y, width, height float32) {
 	cl.points = [8]float32{
 		// horizontal line
 		0, y, width, y,
 		// vertical line
-		x, 0, x, yBottom,
+		x, 0, x, height,
 	}
 	gl.BindBuffer(gl.ARRAY_BUFFER, cl.vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, 4*len(cl.points), gl.Ptr(&cl.points[0]), gl.STATIC_DRAW)

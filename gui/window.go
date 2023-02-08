@@ -116,20 +116,33 @@ func (w *Window) RunRendering() {
 
 func (w *Window) drawLabels() {
 	// warning. Code is fragile, don't draw text before crosslines drawing because it change program
-	yBottom := int(float32(w.Height) * config.BarsComponentHeight)
+	barsBottom := int(float32(w.Height) * config.BarsComponentHeight)
 	x, y := w.window.GetCursorPos()
 	barsHeight := float32(w.Height) * config.BarsComponentHeight
 	if float32(y) <= barsHeight && y >= 0 && x >= 0 && x <= float64(w.Width) {
 		dPrice := w.ViewInfo.MaxPrice - w.ViewInfo.MinPrice
 		price := w.ViewInfo.MaxPrice - (float32(y)/barsHeight)*dPrice
-		w.crosslines.Update(float32(x), float32(y), float32(w.Width), float32(yBottom))
+		w.crosslines.Update(float32(x), float32(y), float32(w.Width), float32(w.Height))
 		w.crosslines.Draw()
 		w.font.SetColor(0.3, 0.3, 0.3, 1)
 		w.font.Printf(0, float32(y), 1, fmt.Sprintf("%0.2f", price))
+		bar, ok := w.viewport.WindowXToBar(float32(x), float32(w.Width))
+		if ok {
+			pad := float32(20)
+			time := time.UnixMilli(bar.Timestampt)
+			timeStr := time.Format("Mon Jan _2 15:04:05 2006")
+			w.font.Printf(float32(x)+pad, float32(barsBottom), 1, timeStr)
+
+			w.font.Printf(float32(x)+pad, float32(y)-20*4-pad, 1, fmt.Sprintf("Open:  %0.2f", bar.Open))
+			w.font.Printf(float32(x)+pad, float32(y)-20*3-pad, 1, fmt.Sprintf("High:  %0.2f", bar.High))
+			w.font.Printf(float32(x)+pad, float32(y)-20*2-pad, 1, fmt.Sprintf("Low:   %0.2f", bar.Low))
+			w.font.Printf(float32(x)+pad, float32(y)-20*1-pad, 1, fmt.Sprintf("Close: %0.2f", bar.Close))
+			w.font.Printf(float32(x)+pad, float32(y)-20*0-pad, 1, fmt.Sprintf("Vol: %d", bar.Volume))
+		}
 	}
 
 	w.font.SetColor(0.3, 0.3, 0.3, 1)
-	w.font.Printf(0, float32(yBottom), 1, fmt.Sprintf("%0.2f", w.ViewInfo.MinPrice))
+	w.font.Printf(0, float32(barsBottom), 1, fmt.Sprintf("%0.2f", w.ViewInfo.MinPrice))
 	w.font.Printf(0, config.FontSize, 1, fmt.Sprintf("%0.2f", w.ViewInfo.MaxPrice))
 
 }

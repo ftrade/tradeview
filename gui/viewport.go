@@ -60,6 +60,10 @@ func (v *Viewport) CalcView() ViewInfo {
 	}
 }
 
-// func (v *Viewport) WindowPointToBar(x, y float32, width, height int) (bar market.Candle, price float32, ok bool) {
-
-// }
+func (v *Viewport) WindowXToBar(x, width float32) (bar market.Candle, ok bool) {
+	index := int(v.viewLeft + v.ViewWidth()*(x/width) + 0.5)
+	if index >= 0 && index < len(v.XAxis.bars) {
+		return v.XAxis.bars[index], true
+	}
+	return bar, false
+}
