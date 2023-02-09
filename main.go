@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"runtime"
-	"tradeview/config"
-	"tradeview/gui"
-	"tradeview/market"
-	"tradeview/opengl"
-	"tradeview/scene"
+
+	"github.com/ftrade/tradeview/gui"
+	"github.com/ftrade/tradeview/market"
+	"github.com/ftrade/tradeview/opengl"
+	"github.com/ftrade/tradeview/scene"
 
 	"github.com/go-gl/gl/all-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -21,7 +22,11 @@ const (
 
 func main() {
 	fmt.Println("App Started")
-	report := market.LoadReport(config.ReportPath)
+	if len(os.Args) < 2 {
+		fmt.Println("missed path to report CLI argument")
+		os.Exit(2)
+	}
+	report := market.LoadReport(os.Args[1])
 	runtime.LockOSThread()
 	opengl.InitOpenGL()
 

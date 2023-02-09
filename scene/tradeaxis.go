@@ -2,7 +2,8 @@ package scene
 
 import (
 	"math"
-	"tradeview/market"
+
+	"github.com/ftrade/tradeview/market"
 )
 
 type XTrade struct {

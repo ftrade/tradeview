@@ -1,9 +1,9 @@
 package gui
 
 import (
-	"tradeview/config"
-	"tradeview/market"
-	"tradeview/scene"
+	"github.com/ftrade/tradeview/config"
+	"github.com/ftrade/tradeview/market"
+	"github.com/ftrade/tradeview/scene"
 
 	mgl "github.com/go-gl/mathgl/mgl32"
 )

@@ -1,16 +1,14 @@
 package scene
 
 import (
-	"tradeview/market"
-	"tradeview/opengl"
+	"github.com/ftrade/tradeview/market"
+	"github.com/ftrade/tradeview/opengl"
 
 	"github.com/go-gl/gl/all-core/gl"
 )
 
 type Trades struct {
 	TradeAxis     TradeAxis
-	rectsVerteces []float32
-	rectsVao      uint32
 	linesVerteces []float32
 	linesVao      uint32
 }

@@ -3,9 +3,11 @@ package gui
 import (
 	"fmt"
 	"math"
+	"os"
 	"time"
-	"tradeview/config"
-	"tradeview/scene"
+
+	"github.com/ftrade/tradeview/config"
+	"github.com/ftrade/tradeview/scene"
 
 	"github.com/go-gl/gl/all-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -27,7 +29,12 @@ type Window struct {
 func InitWindow(width, height int, title string, viewport *Viewport) *Window {
 	w := initGlfw(width, height, title)
 
-	font, err := glfont.LoadFont(config.FontPath, config.FontSize, width, height)
+	fontPath, ok := os.LookupEnv("TRUETYPE_FONT_PATH")
+	if !ok {
+		fmt.Println("missed TRUETYPE_FONT_PATH environment variable")
+		os.Exit(2)
+	}
+	font, err := glfont.LoadFont(fontPath, config.FontSize, width, height)
 	if err != nil {
 		panic(err)
 	}

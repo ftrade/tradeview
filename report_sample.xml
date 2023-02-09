@@ -1,0 +1,14 @@
+<report>
+    <candles>
+        <candle timestampt="1578304800000" open="254.75" high="254.84" low="253.85" close="253.85" volume="401780"></candle>
+        <candle timestampt="1578304860000" open="253.85" high="254" low="253.03" close="253.14" volume="228720"></candle>
+        <candle timestampt="1578304920000" open="253.04" high="253.6" low="253.04" close="253.51" volume="78440"></candle>
+        <candle timestampt="1578304980000" open="253.55" high="253.65" low="253.2" close="253.2" volume="96310"></candle>
+        <candle timestampt="1578305040000" open="253.21" high="253.21" low="252.82" close="253" volume="232020"></candle>
+        <candle timestampt="1578305100000" open="253" high="253" low="252.52" close="252.63" volume="215530"></candle>
+    </candles>
+    <trades>
+    	<trade timestampt="1578304860000" price="253.85" volume="2"></trade>
+        <trade timestampt="1578305040000" price="253.21" volume="-2" profit="-1.28"></trade>
+    </trades>
+</report>

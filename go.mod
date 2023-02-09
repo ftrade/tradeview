@@ -1,4 +1,4 @@
-module tradeview
+module github.com/ftrade/tradeview
 
 go 1.19
 

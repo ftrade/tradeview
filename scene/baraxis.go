@@ -3,7 +3,8 @@ package scene
 import (
 	"fmt"
 	"math"
-	"tradeview/market"
+
+	"github.com/ftrade/tradeview/market"
 )
 
 // segment represent time period from leftMillis to rightMillis.
