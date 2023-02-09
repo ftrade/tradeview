@@ -1,6 +1,7 @@
 package scene
 
 import (
+	"fmt"
 	"math"
 	"tradeview/market"
 )
@@ -132,6 +133,10 @@ func (xa *BarAxis) searchSegment(index int) (segIndex int) {
 		si = len(xa.segments) - 1
 	}
 	for {
+		if si >= len(xa.segments) {
+			// try catch error
+			fmt.Printf("Search index: %d. Bars count: %d. Last segment %+v", index, len(xa.Bars), xa.segments[len(xa.segments)])
+		}
 		curSeg := xa.segments[si]
 		if curSeg.leftIndex <= index && index <= curSeg.rightIndex {
 			return si
