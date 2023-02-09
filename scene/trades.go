@@ -8,11 +8,13 @@ import (
 )
 
 type Trades struct {
+	TradeAxis     TradeAxis
 	linesVerteces []float32
 	linesVao      uint32
 }
 
-func BuildTrades(trades []market.Trade, xAxis XAxis) *Trades {
+func BuildTrades(trades []market.Trade, xAxis BarAxis) *Trades {
+	tradeAxis := newTradeAxis(len(trades))
 	tradesN := len(trades)
 	linesVerteces := make([]float32, 2*2*tradesN)
 	linesColors := make([]uint32, 2*tradesN)
@@ -21,6 +23,8 @@ func BuildTrades(trades []market.Trade, xAxis XAxis) *Trades {
 	for i, trade := range trades {
 		t := trade.Timestampt
 		x := xAxis.TimeToX(t)
+		tradeAxis.trades[i] = XTrade{x, trade}
+
 		vertexOffset := i * 4
 		linesVerteces[vertexOffset] = x
 		linesVerteces[vertexOffset+1] = minPrice
@@ -37,6 +41,7 @@ func BuildTrades(trades []market.Trade, xAxis XAxis) *Trades {
 		linesColors[coloerOffset+1] = color
 	}
 	return &Trades{
+		TradeAxis:     tradeAxis,
 		linesVerteces: linesVerteces,
 		linesVao:      opengl.MakeVao(linesVerteces, linesColors),
 	}

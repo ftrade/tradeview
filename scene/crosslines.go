@@ -50,7 +50,7 @@ func (cl *CrossLines) Update(x, y, width, height float32) {
 		x, 0, x, height,
 	}
 	gl.BindBuffer(gl.ARRAY_BUFFER, cl.vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, 4*len(cl.points), gl.Ptr(&cl.points[0]), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, 4*len(cl.points), gl.Ptr(&cl.points[0]), gl.DYNAMIC_DRAW)
 }
 
 func (cl *CrossLines) Draw() {

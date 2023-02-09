@@ -17,14 +17,14 @@ type segment struct {
 	maxVolume          int32
 }
 
-// XAxis represents x axis that can map bar timestamp to index and vice versa.
-type XAxis struct {
+// BarAxis represents x axis that can map bar timestamp to index and vice versa.
+type BarAxis struct {
 	Bars      []market.Candle
 	segments  []segment
 	stepWidth int
 }
 
-func NewXAxis(bars []market.Candle) XAxis {
+func NewXAxis(bars []market.Candle) BarAxis {
 	stepWidth := bars[1].Timestampt - bars[0].Timestampt
 
 	var segments []segment
@@ -65,24 +65,24 @@ func NewXAxis(bars []market.Candle) XAxis {
 	seg.rightMillis = prevMilli
 	segments = append(segments, seg)
 
-	return XAxis{
+	return BarAxis{
 		segments:  segments,
 		stepWidth: int(stepWidth),
 		Bars:      bars,
 	}
 }
 
-func (xa *XAxis) WidthX() int {
+func (xa *BarAxis) WidthX() int {
 	return len(xa.Bars) - 1
 }
 
-func (xa *XAxis) WidthTime() int64 {
+func (xa *BarAxis) WidthTime() int64 {
 	leftMilli := xa.Bars[0].Timestampt
 	rightMilli := xa.Bars[len(xa.Bars)-1].Timestampt
 	return rightMilli - leftMilli
 }
 
-func (xa *XAxis) MinMaxPriceAndMaxVolume(from int, upTo int) (float32, float32, int32) {
+func (xa *BarAxis) MinMaxPriceAndMaxVolume(from int, upTo int) (float32, float32, int32) {
 	if from < 0 {
 		from = 0
 	}
@@ -125,7 +125,7 @@ func (xa *XAxis) MinMaxPriceAndMaxVolume(from int, upTo int) (float32, float32, 
 	return minPrice, maxPrice, maxVol
 }
 
-func (xa *XAxis) searchSegment(index int) (segIndex int) {
+func (xa *BarAxis) searchSegment(index int) (segIndex int) {
 	avgSegmentSize := len(xa.Bars) / len(xa.segments)
 	si := index / avgSegmentSize
 	if si >= len(xa.segments) {
@@ -144,7 +144,7 @@ func (xa *XAxis) searchSegment(index int) (segIndex int) {
 	}
 }
 
-func (xa *XAxis) TimeToX(millis int64) float32 {
+func (xa *BarAxis) TimeToX(millis int64) float32 {
 	timeCoeff := float32(millis-xa.Bars[0].Timestampt) / float32(xa.WidthTime())
 	indexGuess := timeCoeff * float32(len(xa.Bars))
 	i := int(indexGuess)
@@ -190,8 +190,4 @@ func (xa *XAxis) TimeToX(millis int64) float32 {
 	}
 	widthBetweenBars := float32(xa.Bars[rightIndex].Timestampt - xa.Bars[leftIndex].Timestampt)
 	return float32(leftIndex) + float32(millis-xa.Bars[leftIndex].Timestampt)/widthBetweenBars
-}
-
-func (xa *XAxis) XToTime(x float32) int64 {
-	return 0
 }

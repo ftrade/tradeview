@@ -9,11 +9,11 @@ import (
 )
 
 type Viewport struct {
-	XAxis               scene.XAxis
+	XAxis               scene.BarAxis
 	viewRight, viewLeft float32
 }
 
-func NewViewport(xAxis scene.XAxis) *Viewport {
+func NewViewport(xAxis scene.BarAxis) *Viewport {
 	v := &Viewport{
 		XAxis:     xAxis,
 		viewLeft:  -0.5,
@@ -58,8 +58,12 @@ func (v *Viewport) CalcView() ViewInfo {
 	}
 }
 
-func (v *Viewport) WindowXToBar(x, width float32) (bar market.Candle, ok bool) {
-	index := int(v.viewLeft + v.ViewWidth()*(x/width) + 0.5)
+func (v *Viewport) WindowXToViewX(x, width float32) float32 {
+	return v.viewLeft + v.ViewWidth()*(x/width)
+}
+
+func (v *Viewport) FindBar(viewX float32) (bar market.Candle, ok bool) {
+	index := int(viewX + 0.5)
 	if index >= 0 && index < len(v.XAxis.Bars) {
 		return v.XAxis.Bars[index], true
 	}

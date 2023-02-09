@@ -37,6 +37,7 @@ func main() {
 	candles := scene.BuildCandles(report.Candles.Items)
 	volumes := scene.BuildVolumes(report.Candles.Items)
 	trades := scene.BuildTrades(report.Trades.Items, xAxis)
+	window.SetTradeAxis(trades.TradeAxis)
 
 	window.OnDraw(func() {
 		gl.Clear(gl.COLOR_BUFFER_BIT)

@@ -2,6 +2,7 @@ package gui
 
 import (
 	"fmt"
+	"math"
 	"time"
 	"tradeview/config"
 	"tradeview/scene"
@@ -20,6 +21,7 @@ type Window struct {
 	drawScene     func()
 	viewport      *Viewport
 	font          *glfont.Font
+	tradeAxis     scene.TradeAxis
 }
 
 func InitWindow(width, height int, title string, viewport *Viewport) *Window {
@@ -69,20 +71,17 @@ func InitWindow(width, height int, title string, viewport *Viewport) *Window {
 		if yoff > 0 {
 			scaleFactor = 0.8
 		}
-		window.scale(scaleFactor)
+		x, _ := w.GetCursorPos()
+		whereScale := x / float64(window.Width)
+		window.viewport.Scale(scaleFactor, float32(whereScale))
+		window.ViewInfo = window.viewport.CalcView()
 	})
 
 	return window
 }
 
-func (w *Window) scale(factor float32) {
-	if factor < 0 {
-		return
-	}
-	x, _ := w.window.GetCursorPos()
-	whereScale := x / float64(w.Width)
-	w.viewport.Scale(factor, float32(whereScale))
-	w.ViewInfo = w.viewport.CalcView()
+func (w *Window) SetTradeAxis(ta scene.TradeAxis) {
+	w.tradeAxis = ta
 }
 
 var prevTime time.Time
@@ -124,11 +123,14 @@ func (w *Window) drawLabels() {
 		price := w.ViewInfo.MaxPrice - (float32(y)/barsHeight)*dPrice
 		w.crosslines.Update(float32(x), float32(y), float32(w.Width), float32(w.Height))
 		w.crosslines.Draw()
+
+		pad := float32(20)
 		w.font.SetColor(0.3, 0.3, 0.3, 1)
 		w.font.Printf(0, float32(y), 1, fmt.Sprintf("%0.2f", price))
-		bar, ok := w.viewport.WindowXToBar(float32(x), float32(w.Width))
+		viewX := w.viewport.WindowXToViewX(float32(x), float32(w.Width))
+		bar, ok := w.viewport.FindBar(viewX)
 		if ok {
-			pad := float32(20)
+
 			time := time.UnixMilli(bar.Timestampt)
 			timeStr := time.Format("Mon Jan _2 15:04:05 2006")
 			w.font.Printf(float32(x)+pad, float32(barsBottom), 1, timeStr)
@@ -138,6 +140,30 @@ func (w *Window) drawLabels() {
 			w.font.Printf(float32(x)+pad, float32(y)-20*2-pad, 1, fmt.Sprintf("Low:   %0.2f", bar.Low))
 			w.font.Printf(float32(x)+pad, float32(y)-20*1-pad, 1, fmt.Sprintf("Close: %0.2f", bar.Close))
 			w.font.Printf(float32(x)+pad, float32(y)-20*0-pad, 1, fmt.Sprintf("Vol: %d", bar.Volume))
+		}
+
+		// try make convient search distance depending scale and window width
+		wdx := math.Pow(float64(w.viewport.ViewWidth()*0.1), 0.5)
+		searchDistance := float32(wdx) * float32(math.Log10(wdx))
+		if searchDistance < 0.25 {
+			searchDistance = 0.25
+		}
+		trades := w.tradeAxis.FindTrade(viewX, searchDistance)
+		if len(trades) > 0 {
+			if len(trades) == 1 {
+				trade := trades[0].Trade
+				w.font.Printf(float32(x)+pad, float32(y)+20*1+pad, 1, fmt.Sprintf("Price: %0.2f", trade.Price))
+				w.font.Printf(float32(x)+pad, float32(y)+20*2+pad, 1, fmt.Sprintf("Vol: %d", trade.Volume))
+				time := time.UnixMilli(trade.Timestampt)
+				timeStr := time.Format("15:04:05")
+				w.font.Printf(float32(x)+pad, float32(y)+20*3+pad, 1, fmt.Sprintf("Time: %s", timeStr))
+				if trade.Profit != 0 {
+					w.font.Printf(float32(x)+pad, float32(y)+20*4+pad, 1, fmt.Sprintf("Profit: %0.2f", trade.Profit))
+				}
+
+			} else {
+				w.font.Printf(float32(x)+pad, float32(y)+20*1+pad, 1, fmt.Sprintf("%d trades", len(trades)))
+			}
 		}
 	}
 
