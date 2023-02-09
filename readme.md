@@ -21,7 +21,7 @@ sudo apt install xorg-dev
 ## Install binary
 
 ```bash
-go install github.com/ftrade/tradeview@0.1
+go install github.com/ftrade/tradeview@v0.1
 ```
 
 ## Run binary
@@ -34,4 +34,4 @@ Application require two inputs:
 TRUETYPE_FONT_PATH=path_to_tff tradeview path_to_report
 ```
 
-You can use [report_sample.xml](https://github.com/ftrade/tradeview/report_example.xml) as a small report file to test the application.
+You can use [report_sample.xml](https://github.com/ftrade/tradeview/report_sample.xml) as a small report file to test the application.
