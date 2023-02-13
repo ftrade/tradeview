@@ -21,7 +21,7 @@ sudo apt install xorg-dev
 ## Install binary
 
 ```bash
-go install github.com/ftrade/tradeview@v0.1
+go install github.com/ftrade/tradeview@v0.1.0
 ```
 
 ## Run binary
