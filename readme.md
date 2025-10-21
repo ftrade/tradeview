@@ -16,7 +16,7 @@ Tradeview is an application for rendering static market data: candles and trades
 Tradeview uses OpenGL for rendering via [go-gl](https://github.com/go-gl/gl). go-gl uses cgo to invoke OpenGL API and your OS must have corresponding libraries. For debian/ubuntu you can install by:
 
 ```bash
-sudo apt install xorg-dev
+sudo apt install xorg-dev fonts-freefont-ttf 
 ```
 ## Install binary
 
