@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log/slog"
 	"os"
 	"runtime"
 
@@ -16,15 +16,23 @@ import (
 )
 
 const (
-	width  = 1000
-	height = 500
+	width                   = 1000
+	height                  = 500
+	ErrNoCommandArgToReport = 2
+	MinCmdArgCount          = 2
 )
 
 func main() {
-	fmt.Println("App Started")
-	if len(os.Args) < 2 {
-		fmt.Println("missed path to report CLI argument")
-		os.Exit(2)
+	logLevel := &slog.LevelVar{} // INFO
+	opts := &slog.HandlerOptions{
+		Level: logLevel,
+	}
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, opts)))
+
+	slog.Info("App Started")
+	if len(os.Args) < MinCmdArgCount {
+		slog.Info("missed path to report CLI argument")
+		os.Exit(ErrNoCommandArgToReport)
 	}
 	report := market.LoadReport(os.Args[1])
 	runtime.LockOSThread()
@@ -33,6 +41,8 @@ func main() {
 	xAxis := scene.NewXAxis(report.Candles.Items)
 	viewport := gui.NewViewport(xAxis)
 	window := gui.InitWindow(width, height, "Tradeview", viewport)
+	// disable V-Sync (remove 60 FPS limit) — must be called after a current GL context exists
+	// glfw.SwapInterval(0)
 	defer glfw.Terminate()
 
 	program := opengl.MakeProgram()
@@ -48,7 +58,7 @@ func main() {
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 		gl.ClearColor(1, 1, 1, 1)
 
-		gl.UseProgram(program.Id)
+		gl.UseProgram(program.ID)
 		program.UpdateMatrix(window.ViewInfo.BarsMat)
 		candles.Draw()
 		trades.Draw()

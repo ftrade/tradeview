@@ -1,7 +1,6 @@
 package scene
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/ftrade/tradeview/market"
@@ -127,25 +126,21 @@ func (xa *BarAxis) MinMaxPriceAndMaxVolume(from int, upTo int) (float32, float32
 	return minPrice, maxPrice, maxVol
 }
 
-func (xa *BarAxis) searchSegment(index int) (segIndex int) {
+func (xa *BarAxis) searchSegment(index int) int {
 	avgSegmentSize := len(xa.Bars) / len(xa.segments)
-	si := index / avgSegmentSize
-	if si >= len(xa.segments) {
-		si = len(xa.segments) - 1
+	segIndex := index / avgSegmentSize
+	if segIndex >= len(xa.segments) {
+		segIndex = len(xa.segments) - 1
 	}
 	for {
-		if si >= len(xa.segments) {
-			// try catch error
-			fmt.Printf("Search index: %d. Bars count: %d. Last segment %+v", index, len(xa.Bars), xa.segments[len(xa.segments)])
-		}
-		curSeg := xa.segments[si]
+		curSeg := xa.segments[segIndex]
 		if curSeg.leftIndex <= index && index <= curSeg.rightIndex {
-			return si
+			return segIndex
 		}
 		if index < curSeg.leftIndex {
-			si--
+			segIndex--
 		} else if index > curSeg.rightIndex {
-			si++
+			segIndex++
 		}
 	}
 }
@@ -166,20 +161,10 @@ func (xa *BarAxis) TimeToX(millis int64) float32 {
 			if bar.Timestampt > millis {
 				searchLeft = true
 			}
-		} else {
-			if searchLeft {
-				if bar.Timestampt < millis {
-					leftIndex = i
-					rightIndex = i + 1
-					break
-				}
-			} else {
-				if bar.Timestampt < millis {
-					leftIndex = i
-					rightIndex = i + 1
-					break
-				}
-			}
+		} else if bar.Timestampt < millis {
+			leftIndex = i
+			rightIndex = i + 1
+			break
 		}
 		if searchLeft {
 			i--
@@ -190,9 +175,8 @@ func (xa *BarAxis) TimeToX(millis int64) float32 {
 	if leftIndex < 0 {
 		if searchLeft {
 			return 0
-		} else {
-			return float32(xa.WidthX())
 		}
+		return float32(xa.WidthX())
 	}
 	widthBetweenBars := float32(xa.Bars[rightIndex].Timestampt - xa.Bars[leftIndex].Timestampt)
 	return float32(leftIndex) + float32(millis-xa.Bars[leftIndex].Timestampt)/widthBetweenBars

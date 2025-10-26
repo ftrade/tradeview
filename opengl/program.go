@@ -1,7 +1,7 @@
 package opengl
 
 import (
-	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/go-gl/gl/all-core/gl"
@@ -9,27 +9,27 @@ import (
 )
 
 type Program struct {
-	Id       uint32
-	matrixId int32
+	ID       uint32
+	matrixID int32
 }
 
 func (p *Program) Validate() {
-	gl.ValidateProgram(p.Id)
+	gl.ValidateProgram(p.ID)
 	var params int32 = -1
-	gl.GetProgramiv(p.Id, gl.VALIDATE_STATUS, &params)
+	gl.GetProgramiv(p.ID, gl.VALIDATE_STATUS, &params)
 	if params != gl.TRUE {
-		log := GetInfoLog(p.Id, gl.GetProgramiv, gl.GetProgramInfoLog)
-		fmt.Print(log)
+		log := GetInfoLog(p.ID, gl.GetProgramiv, gl.GetProgramInfoLog)
+		slog.Info(log)
 		os.Exit(1)
 	}
 }
 
 func (p *Program) InitUniformMatrix() {
 	matrixName := gl.Str("matrix\x00")
-	p.matrixId = gl.GetUniformLocation(p.Id, matrixName)
+	p.matrixID = gl.GetUniformLocation(p.ID, matrixName)
 }
 
 func (p *Program) UpdateMatrix(m mgl.Mat4) {
-	gl.UseProgram(p.Id)
-	gl.UniformMatrix4fv(p.matrixId, 1, false, &m[0])
+	gl.UseProgram(p.ID)
+	gl.UniformMatrix4fv(p.matrixID, 1, false, &m[0])
 }

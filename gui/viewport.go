@@ -8,6 +8,8 @@ import (
 	mgl "github.com/go-gl/mathgl/mgl32"
 )
 
+const Indent = 0.5
+
 type Viewport struct {
 	XAxis               scene.BarAxis
 	viewRight, viewLeft float32
@@ -16,8 +18,8 @@ type Viewport struct {
 func NewViewport(xAxis scene.BarAxis) *Viewport {
 	v := &Viewport{
 		XAxis:     xAxis,
-		viewLeft:  -0.5,
-		viewRight: float32(xAxis.WidthX()) + 0.5,
+		viewLeft:  -Indent,
+		viewRight: float32(xAxis.WidthX()) + Indent,
 	}
 	return v
 }
@@ -63,7 +65,7 @@ func (v *Viewport) WindowXToViewX(x, width float32) float32 {
 }
 
 func (v *Viewport) FindBar(viewX float32) (bar market.Candle, ok bool) {
-	index := int(viewX + 0.5)
+	index := int(viewX + Indent)
 	if index >= 0 && index < len(v.XAxis.Bars) {
 		return v.XAxis.Bars[index], true
 	}

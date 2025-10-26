@@ -47,7 +47,7 @@ func BuildCandles(candles []market.Candle) *Candles {
 			vy1, vy2 = vy2, vy1
 		}
 
-		//2,5 _____ 6
+		// 2,5 _____ 6
 		//   |\    |
 		//   | \   |
 		//   |  \  |

@@ -23,7 +23,7 @@ func BuildVolumes(candles []market.Candle) *Volumes {
 		barLeft := x - barHalfWidth
 		barRight := x + barHalfWidth
 
-		//2,5 _____ 6
+		// 2,5 _____ 6
 		//   |\    |
 		//   | \   |
 		//   |  \  |
