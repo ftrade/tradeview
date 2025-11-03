@@ -1,6 +1,8 @@
-package scene
+package tscene
 
 import (
+	"fmt"
+	"log/slog"
 	"math"
 
 	"github.com/ftrade/tradeview/market"
@@ -18,14 +20,14 @@ type segment struct {
 	maxVolume          int32
 }
 
-// BarAxis represents x axis that can map bar timestamp to index and vice versa.
-type BarAxis struct {
+// CandleAxis represents x axis that can map bar timestamp to index and vice versa.
+type CandleAxis struct {
 	Bars      []market.Candle
 	segments  []segment
 	stepWidth int
 }
 
-func NewXAxis(bars []market.Candle) BarAxis {
+func NewXAxis(bars []market.Candle) *CandleAxis {
 	stepWidth := bars[1].Timestampt - bars[0].Timestampt
 
 	var segments []segment
@@ -66,24 +68,24 @@ func NewXAxis(bars []market.Candle) BarAxis {
 	seg.rightMillis = prevMilli
 	segments = append(segments, seg)
 
-	return BarAxis{
+	return &CandleAxis{
 		segments:  segments,
 		stepWidth: int(stepWidth),
 		Bars:      bars,
 	}
 }
 
-func (xa *BarAxis) WidthX() int {
+func (xa *CandleAxis) WidthX() int {
 	return len(xa.Bars) - 1
 }
 
-func (xa *BarAxis) WidthTime() int64 {
+func (xa *CandleAxis) WidthTime() int64 {
 	leftMilli := xa.Bars[0].Timestampt
 	rightMilli := xa.Bars[len(xa.Bars)-1].Timestampt
 	return rightMilli - leftMilli
 }
 
-func (xa *BarAxis) MinMaxPriceAndMaxVolume(from int, upTo int) (float32, float32, int32) {
+func (xa *CandleAxis) MinMaxPriceAndMaxVolume(from int, upTo int) (float32, float32, int32) {
 	if from < 0 {
 		from = 0
 	}
@@ -126,13 +128,21 @@ func (xa *BarAxis) MinMaxPriceAndMaxVolume(from int, upTo int) (float32, float32
 	return minPrice, maxPrice, maxVol
 }
 
-func (xa *BarAxis) searchSegment(index int) int {
+func (xa *CandleAxis) searchSegment(index int) int {
 	avgSegmentSize := len(xa.Bars) / len(xa.segments)
 	segIndex := index / avgSegmentSize
 	if segIndex >= len(xa.segments) {
 		segIndex = len(xa.segments) - 1
 	}
 	for {
+		if segIndex >= len(xa.segments) {
+			// try catch error
+			slog.Warn(fmt.Sprintf(
+				"Search index: %d. Bars count: %d. Last segment %+v",
+				index,
+				len(xa.Bars),
+				xa.segments[len(xa.segments)-1]))
+		}
 		curSeg := xa.segments[segIndex]
 		if curSeg.leftIndex <= index && index <= curSeg.rightIndex {
 			return segIndex
@@ -145,7 +155,7 @@ func (xa *BarAxis) searchSegment(index int) int {
 	}
 }
 
-func (xa *BarAxis) TimeToX(millis int64) float32 {
+func (xa *CandleAxis) TimeToX(millis int64) float32 {
 	timeCoeff := float32(millis-xa.Bars[0].Timestampt) / float32(xa.WidthTime())
 	indexGuess := timeCoeff * float32(len(xa.Bars))
 	i := int(indexGuess)
@@ -180,4 +190,12 @@ func (xa *BarAxis) TimeToX(millis int64) float32 {
 	}
 	widthBetweenBars := float32(xa.Bars[rightIndex].Timestampt - xa.Bars[leftIndex].Timestampt)
 	return float32(leftIndex) + float32(millis-xa.Bars[leftIndex].Timestampt)/widthBetweenBars
+}
+
+func (xa *CandleAxis) FindBar(sceneX float32) (bar market.Candle, ok bool) {
+	index := int(sceneX + Indent)
+	if index >= 0 && index < len(xa.Bars) {
+		return xa.Bars[index], true
+	}
+	return bar, false
 }

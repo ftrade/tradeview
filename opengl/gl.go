@@ -9,15 +9,15 @@ import (
 
 // MakeVao initializes and returns a vertex array from the points provided.
 func MakeVao(points []float32, colors []uint32) uint32 {
-	var pointsVbo uint32
+	var vao uint32
 	const count = 1
+	gl.GenVertexArrays(count, &vao)
+	gl.BindVertexArray(vao)
+
+	var pointsVbo uint32
 	gl.GenBuffers(count, &pointsVbo)
 	gl.BindBuffer(gl.ARRAY_BUFFER, pointsVbo)
 	gl.BufferData(gl.ARRAY_BUFFER, Float32ByteSize*len(points), gl.Ptr(points), gl.STATIC_DRAW)
-
-	var vao uint32
-	gl.GenVertexArrays(count, &vao)
-	gl.BindVertexArray(vao)
 	const _2d = 2
 	gl.VertexAttribPointer(0, _2d, gl.FLOAT, false, 0, nil)
 	gl.EnableVertexAttribArray(0)
@@ -27,7 +27,9 @@ func MakeVao(points []float32, colors []uint32) uint32 {
 		gl.GenBuffers(count, &colorsVbo)
 		gl.BindBuffer(gl.ARRAY_BUFFER, colorsVbo)
 		gl.BufferData(gl.ARRAY_BUFFER, Float32ByteSize*len(colors), gl.Ptr(colors), gl.STATIC_DRAW)
-		gl.VertexAttribIPointer(1, 1, gl.UNSIGNED_INT, 0, nil)
+
+		const _1d = 1
+		gl.VertexAttribIPointer(1, _1d, gl.UNSIGNED_INT, 0, nil)
 		gl.EnableVertexAttribArray(1)
 	}
 	return vao

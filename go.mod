@@ -1,4 +1,5 @@
 module github.com/ftrade/tradeview
+
 go 1.25
 
 require (

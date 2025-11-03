@@ -30,6 +30,5 @@ func (p *Program) InitUniformMatrix() {
 }
 
 func (p *Program) UpdateMatrix(m mgl.Mat4) {
-	gl.UseProgram(p.ID)
 	gl.UniformMatrix4fv(p.matrixID, 1, false, &m[0])
 }

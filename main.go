@@ -5,14 +5,12 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/ftrade/tradeview/gui"
+	"github.com/ftrade/tradeview/config"
 	"github.com/ftrade/tradeview/market"
 	"github.com/ftrade/tradeview/opengl"
-	"github.com/ftrade/tradeview/scene"
+	"github.com/ftrade/tradeview/tscene"
 
-	"github.com/go-gl/gl/all-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/go-gl/mathgl/mgl32"
 )
 
 const (
@@ -32,40 +30,23 @@ func main() {
 	slog.Info("App Started")
 	if len(os.Args) < MinCmdArgCount {
 		slog.Info("missed path to report CLI argument")
-		os.Exit(ErrNoCommandArgToReport)
+
+		// os.Exit(ErrNoCommandArgToReport)
 	}
-	report := market.LoadReport(os.Args[1])
+	report := market.LoadReport("/data/ws/data/candles.xml")
 	runtime.LockOSThread()
 	opengl.InitOpenGL()
 
-	xAxis := scene.NewXAxis(report.Candles.Items)
-	viewport := gui.NewViewport(xAxis)
-	window := gui.InitWindow(width, height, "Tradeview", viewport)
+	window := opengl.InitWindow(width, height, "Tradeview", config.FontSize)
+	tradeScene := tscene.BuildScene(report, window.Font, height, width)
 	// disable V-Sync (remove 60 FPS limit) — must be called after a current GL context exists
-	// glfw.SwapInterval(0)
+	glfw.SwapInterval(0)
 	defer glfw.Terminate()
 
 	program := opengl.MakeProgram()
-	program.InitUniformMatrix()
 	program.Validate()
 
-	candles := scene.BuildCandles(report.Candles.Items)
-	volumes := scene.BuildVolumes(report.Candles.Items)
-	trades := scene.BuildTrades(report.Trades.Items, xAxis)
-	window.SetTradeAxis(trades.TradeAxis)
-
-	window.OnDraw(func() {
-		gl.Clear(gl.COLOR_BUFFER_BIT)
-		gl.ClearColor(1, 1, 1, 1)
-
-		gl.UseProgram(program.ID)
-		program.UpdateMatrix(window.ViewInfo.BarsMat)
-		candles.Draw()
-		trades.Draw()
-		program.UpdateMatrix(window.ViewInfo.VolumesMat)
-		volumes.Draw()
-		// matrix for crosslines
-		program.UpdateMatrix(mgl32.Ortho2D(0, float32(window.Width), float32(window.Height), 0))
-	})
+	window.SetScene(tradeScene.Scene)
+	window.InitScene(&program)
 	window.RunRendering()
 }

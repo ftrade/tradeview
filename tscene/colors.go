@@ -1,4 +1,4 @@
-package scene
+package tscene
 
 type Color = uint32
 
