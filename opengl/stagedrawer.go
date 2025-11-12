@@ -27,14 +27,14 @@ func (sd *StageDrawer) Init() {
 	}
 }
 
-func (sc *StageDrawer) Draw() {
-	if sc.stage.SceneViewUpdated {
-		v := sc.stage.SceneView
-		sc.matrix = mgl32.Ortho2D(v.Left, v.Right, v.Bottom, v.Top)
-		sc.stage.SceneViewUpdated = false
+func (sd *StageDrawer) Draw() {
+	if sd.stage.SceneViewUpdated {
+		v := sd.stage.SceneView
+		sd.matrix = mgl32.Ortho2D(v.Left, v.Right, v.Bottom, v.Top)
+		sd.stage.SceneViewUpdated = false
 	}
-	sc.program.UpdateMatrix(sc.matrix)
-	for _, itemDrawer := range sc.itemsDrawers {
+	sd.program.UpdateMatrix(sd.matrix)
+	for _, itemDrawer := range sd.itemsDrawers {
 		itemDrawer.draw()
 	}
 }

@@ -99,14 +99,16 @@ func (tid *tradeInfoDrawer) Draw(dctx scene.DrawContext) {
 }
 
 type minMaxLabelsDrawer struct {
-	font  *glfont.Font
-	stats *TradeStats
+	font     *glfont.Font
+	stats    *TradeStats
+	fontSize int32
 }
 
-func newMinMaxDrawer(font *glfont.Font, stats *TradeStats) *minMaxLabelsDrawer {
+func newMinMaxDrawer(font *glfont.Font, fontSize int32, stats *TradeStats) *minMaxLabelsDrawer {
 	return &minMaxLabelsDrawer{
-		font:  font,
-		stats: stats,
+		font:     font,
+		fontSize: fontSize,
+		stats:    stats,
 	}
 }
 
@@ -122,21 +124,5 @@ func (mmd *minMaxLabelsDrawer) Draw(dctx scene.DrawContext) {
 	}
 
 	_ = mmd.font.Printf(0, barsBottom, 1, fmt.Sprintf("%0.2f", mmd.stats.MinPrice))
-	_ = mmd.font.Printf(0, config.FontSize, 1, fmt.Sprintf("%0.2f", mmd.stats.MaxPrice))
+	_ = mmd.font.Printf(0, float32(mmd.fontSize), 1, fmt.Sprintf("%0.2f", mmd.stats.MaxPrice))
 }
-
-// func (w *Window) drawPricesLabels() {
-// 	// warning. Code is fragile, don't draw text before crosslines drawing because it change program
-// 	barsBottom := int(float32(w.Height) * config.CandelsComponentHeight)
-// 	x, y := w.window.GetCursorPos()
-// 	barsHeight := float32(w.Height) * config.CandelsComponentHeight
-// 	if float32(y) <= barsHeight && y >= 0 && x >= 0 && x <= float64(w.Width) {
-// 		dPrice := w.ViewInfo.MaxPrice - w.ViewInfo.MinPrice
-// 		price := w.ViewInfo.MaxPrice - (float32(y)/barsHeight)*dPrice
-
-// 		_ = w.Font.Printf(0, float32(y), 1, fmt.Sprintf("%0.2f", price))
-// 	}
-
-// 	_ = w.Font.Printf(0, float32(barsBottom), 1, fmt.Sprintf("%0.2f", w.ViewInfo.MinPrice))
-// 	_ = w.Font.Printf(0, config.FontSize, 1, fmt.Sprintf("%0.2f", w.ViewInfo.MaxPrice))
-// }

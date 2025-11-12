@@ -64,7 +64,7 @@ func (id *itemDrawer) _GLDrawType() uint32 {
 	case scene.DrawRects:
 		return gl.TRIANGLES
 	default:
-		panic(fmt.Sprintf("Not supported draw mode: %s", id.drawItem.Type))
+		panic(fmt.Sprintf("Not supported draw mode: %d", id.drawItem.Type))
 	}
 }
 

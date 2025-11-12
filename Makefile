@@ -7,4 +7,4 @@ build: lint
 	go build .
 
 run:
-	go run . /data/ws/data/candles.xml
+	go run .

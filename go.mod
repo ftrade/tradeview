@@ -3,9 +3,11 @@ module github.com/ftrade/tradeview
 go 1.25
 
 require (
+	github.com/caarlos0/env/v11 v11.3.1
 	github.com/go-gl/gl v0.0.0-20231021071112-07e5d0ea2e71
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20250301202403-da16c1255728
 	github.com/go-gl/mathgl v1.2.0
+	github.com/joho/godotenv v1.5.1
 	github.com/nullboundary/glfont v0.0.0-20230301004353-1696e6150876
 )
 

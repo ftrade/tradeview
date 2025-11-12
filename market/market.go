@@ -3,6 +3,7 @@ package market
 import (
 	"encoding/xml"
 	"io"
+	"log/slog"
 	"os"
 )
 
@@ -53,5 +54,6 @@ func LoadReport(path string) Report {
 	if err != nil {
 		panic(err)
 	}
+	slog.Debug("Report loaded", "candles", len(report.Candles.Items), "trades", len(report.Trades.Items))
 	return report
 }

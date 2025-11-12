@@ -22,7 +22,7 @@ type TradeScene struct {
 	TradeStats TradeStats
 }
 
-func BuildScene(report market.Report, font *glfont.Font, height, width int32) *TradeScene {
+func BuildScene(report market.Report, font *glfont.Font, fontSize, height, width int32) *TradeScene {
 	xAxis := NewXAxis(report.Candles.Items)
 	candleRect, candleLine := BuildCandles(report.Candles.Items)
 	trades, tradesAxis := BuildTrades(report.Trades.Items, xAxis)
@@ -135,7 +135,7 @@ func BuildScene(report market.Report, font *glfont.Font, height, width int32) *T
 	scene2D.AddDrawer(candleInfoDrawer)
 	tradeInfoDrawer := newTradeInfoDrawer(font, vp, tradesAxis)
 	scene2D.AddDrawer(tradeInfoDrawer)
-	minMaxLabelsDrawer := newMinMaxDrawer(font, stats)
+	minMaxLabelsDrawer := newMinMaxDrawer(font, fontSize, stats)
 	scene2D.AddDrawer(minMaxLabelsDrawer)
 
 	return tradeScene

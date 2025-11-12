@@ -3,7 +3,6 @@ package opengl
 import (
 	"fmt"
 	"log/slog"
-	"os"
 	"time"
 
 	"github.com/ftrade/tradeview/scene"
@@ -14,7 +13,6 @@ import (
 )
 
 const (
-	ErrFontPathMissed  = 3
 	OpenGLMajorVersion = 4
 	OpenGLMinorVersion = 6
 )
@@ -36,18 +34,16 @@ type Window struct {
 	program       *Program
 }
 
-func InitWindow(width, height int, title string, fontSize int32) *Window {
+func InitWindow(width, height int, title string, fontFilePath string, fontSize int32) *Window {
 	w := initGlfw(width, height, title)
 
-	fontPath, ok := os.LookupEnv("TRUETYPE_FONT_PATH")
-	if !ok {
-		slog.Warn("missed TRUETYPE_FONT_PATH environment variable")
-		os.Exit(ErrFontPathMissed)
-	}
-	font, err := glfont.LoadFont(fontPath, fontSize, width, height)
+	slog.Debug("Loading font", "path", fontFilePath)
+	font, err := glfont.LoadFont(fontFilePath, fontSize, width, height)
 	if err != nil {
+		slog.Error("Cannot load font file", "path", fontFilePath)
 		panic(err)
 	}
+	font.SetColor(FontColorR, FontColorG, FontColorB, 1)
 
 	window := &Window{
 		Title:  title,
@@ -147,7 +143,6 @@ func (w *Window) RunRendering() {
 		for _, sc := range w.stagesDrawers {
 			sc.Draw()
 		}
-		w.Font.SetColor(FontColorR, FontColorG, FontColorB, 1)
 		x, y := w.window.GetCursorPos()
 		w.tradeScene.DrawDrawers(scene.DrawContext{
 			MousePosition: scene.Point[int32]{

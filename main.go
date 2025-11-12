@@ -14,38 +14,40 @@ import (
 )
 
 const (
-	width                   = 1000
-	height                  = 500
-	ErrNoCommandArgToReport = 2
-	MinCmdArgCount          = 2
+	width             = 1000
+	height            = 500
+	ErrFailToLoadEnvs = 2
+	ErrParseLogLevel  = 3
 )
 
 func main() {
-	logLevel := &slog.LevelVar{} // INFO
-	opts := &slog.HandlerOptions{
-		Level: logLevel,
+	envs, err := config.LoadEnvs()
+	if err != nil {
+		slog.Error("Fail to load the environment file.", "error", err.Error())
+		os.Exit(ErrFailToLoadEnvs)
 	}
-	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, opts)))
+
+	err = config.InitLogger(envs.LogLevel)
+	if err != nil {
+		slog.Error("Fail to parse the log level environment parameter.", "error", err.Error())
+		os.Exit(ErrParseLogLevel)
+	}
 
 	slog.Info("App Started")
-	if len(os.Args) < MinCmdArgCount {
-		slog.Info("missed path to report CLI argument")
-
-		// os.Exit(ErrNoCommandArgToReport)
-	}
-	report := market.LoadReport("/data/ws/data/candles.xml")
+	report := market.LoadReport(envs.MarketFilePath)
 	runtime.LockOSThread()
 	opengl.InitOpenGL()
 
-	window := opengl.InitWindow(width, height, "Tradeview", config.FontSize)
-	tradeScene := tscene.BuildScene(report, window.Font, height, width)
-	// disable V-Sync (remove 60 FPS limit) — must be called after a current GL context exists
-	glfw.SwapInterval(0)
+	window := opengl.InitWindow(width, height, "Tradeview", envs.FontFilePath, envs.FontSize)
+	tradeScene := tscene.BuildScene(report, window.Font, envs.FontSize, height, width)
 	defer glfw.Terminate()
+
+	if envs.VsyncEnabled {
+		glfw.SwapInterval(0)
+	}
 
 	program := opengl.MakeProgram()
 	program.Validate()
-
 	window.SetScene(tradeScene.Scene)
 	window.InitScene(&program)
 	window.RunRendering()

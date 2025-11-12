@@ -13,10 +13,8 @@ func BuildCandles(candles []market.Candle) (candleRect, minMaxLine *scene.DrawIt
 
 	barHalfWidth := float32(0.25)
 	for i, bar := range candles {
-		isRed := false
 		color := Grean
 		if bar.Open > bar.Close {
-			isRed = true
 			color = Red
 		}
 		colors[i] = color
@@ -31,9 +29,6 @@ func BuildCandles(candles []market.Candle) (candleRect, minMaxLine *scene.DrawIt
 		barLeft := x - barHalfWidth
 		barRight := x + barHalfWidth
 		vy1, vy2 := bar.Open, bar.Close
-		if isRed { //TODO is needed?
-			vy1, vy2 = vy2, vy1
-		}
 
 		rectPos := i * 4
 		rectsVerteces[rectPos] = barLeft
