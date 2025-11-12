@@ -37,7 +37,6 @@ func main() {
 	report := market.LoadReport(envs.MarketFilePath)
 	runtime.LockOSThread()
 	opengl.InitOpenGL()
-
 	window := opengl.InitWindow(width, height, "Tradeview", envs.FontFilePath, envs.FontSize)
 	tradeScene := tscene.BuildScene(report, window.Font, envs.FontSize, height, width)
 	defer glfw.Terminate()
@@ -46,7 +45,7 @@ func main() {
 		glfw.SwapInterval(0)
 	}
 
-	program := opengl.MakeProgram()
+	program := opengl.MakeProgram(tscene.Colors())
 	program.Validate()
 	window.SetScene(tradeScene.Scene)
 	window.InitScene(&program)
