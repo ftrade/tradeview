@@ -1,6 +1,8 @@
 # About
 
-Tradeview is an application for rendering static market data: candles and trades. It was created to analyze large amount of items with high performance. It renders around 70k candles with 700fps on Nvidia 1050ti. 
+Tradeview is an application for rendering static market data: candles and trades. It was created to analyze large amount of items with high performance.
+
+It renders around 70k candles about 3000fps on AMD Ryzen™ 5 7640HS w/ Radeon™ 760M Graphics.
 
 # Features
 
@@ -27,11 +29,20 @@ go install github.com/ftrade/tradeview@v0.1.0
 ## Run binary
 
 Application require two inputs:
-* TrueType font path -- for rendering a text. Passed via environment variable TRUETYPE_FONT_PATH
-* path to report file that contains candles and trades. Passed as first program argument
+* TrueType font path -- for rendering a text. Passed via environment variable FONT_FILE_PATH
+* path to report file that contains candles and trades. Passed via environment variable MARKET_FILE_PATH
 
 ```bash
-TRUETYPE_FONT_PATH=path_to_tff tradeview path_to_report
+TRUETYPE_FONT_PATH=path_to_tff MARKET_FILE_PATH=path_to_report tradeview
 ```
+## Configuration
 
-You can use [report_sample.xml](https://github.com/ftrade/tradeview/report_sample.xml) as a small report file to test the application.
+All configuration are passed as environment variables. They also can be passed using .env file.
+Environment variables:
+* FONT_FILE_PATH -- file path to TrueType font, required
+* MARKET_FILE_PATH -- file path to market report (with candles and other staff), required. You can see example of a file in examples directory.
+* VSYNC_ENABLED -- whether vsync is enabled, optional, default is "true".
+* LOG_LEVEL -- log level for slog, default is "INFO".
+* FONT_SIZE -- fon size for labels, default is 20.
+
+You can use [report_sample.xml](https://github.com/ftrade/tradeview/blob/master/examples/report_sample.xml) as a small report file to test the application.

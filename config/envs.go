@@ -11,7 +11,7 @@ type Envs struct {
 	FontFilePath   string `env:"FONT_FILE_PATH,notEmpty"`
 	FontSize       int32  `env:"FONT_SIZE"                 envDefault:"20"`
 	MarketFilePath string `env:"MARKET_FILE_PATH,notEmpty"`
-	VsyncEnabled   bool   `env:"VSYNC_ENABLED"`
+	VsyncEnabled   bool   `env:"VSYNC_ENABLED"             envDefault:"true"`
 	LogLevel       string `env:"LOG_LEVEL,notEmpty"        envDefault:"INFO"`
 }
 

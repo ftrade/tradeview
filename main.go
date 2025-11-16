@@ -41,7 +41,7 @@ func main() {
 	tradeScene := tscene.BuildScene(report, window.Font, envs.FontSize, height, width)
 	defer glfw.Terminate()
 
-	if envs.VsyncEnabled {
+	if !envs.VsyncEnabled {
 		glfw.SwapInterval(0)
 	}
 
